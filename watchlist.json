@@ -1,0 +1,41 @@
+{
+  "_": "Mantle smart-money seed list. Curated 2026-05-17 from mantlescan.xyz top accounts, labeled CEX/treasury/foundation prioritized over unlabeled whales. EOA-only — pure token contracts (WMNT) and system precompiles (0x420...) excluded because they don't trade.",
+  "wallets": [
+    {
+      "address": "0x0d4dc3b8becc98782309e443a6da4b9455b5ca48",
+      "tag": "bybit-9",
+      "rationale": "Bybit CEX hot wallet (~15.25M MNT). Outflow = retail accumulation cue; inflow = sell pressure cue",
+      "watch_for": ["large_outflow", "large_inflow"]
+    },
+    {
+      "address": "0xb9d507990c009ed1ee853a07b6a20c0925dd8a08",
+      "tag": "mantle-budget-l2",
+      "rationale": "Mantle protocol Budget L2 treasury (~15.04M MNT). Moves precede ecosystem grants / strategic positioning",
+      "watch_for": ["large_outflow", "new_token_acquisition"]
+    },
+    {
+      "address": "0xed884f0460a634c69dbb7def54858465808aacef",
+      "tag": "mantle-rewards-station",
+      "rationale": "Mantle staking-rewards distributor (~6.72M MNT). Anomalous outflows may signal program changes",
+      "watch_for": ["large_outflow"]
+    },
+    {
+      "address": "0xf22943d05ab93f63b0a229b12f4425e72a4c1f1c",
+      "tag": "whale-1",
+      "rationale": "Top MNT holder by balance (~100M MNT). Unlabeled — likely VC / fund / OTC. Any move is high-signal",
+      "watch_for": ["any_outflow", "new_token_acquisition"]
+    },
+    {
+      "address": "0x59800fc68c7039566ed7a04b0f735255093cac1d",
+      "tag": "whale-2",
+      "rationale": "Second-largest holder (~40M MNT). Same rationale as whale-1",
+      "watch_for": ["any_outflow", "new_token_acquisition"]
+    }
+  ],
+  "anomaly_thresholds": {
+    "large_outflow_mnt": 100000,
+    "dormancy_break_days": 14,
+    "cluster_window_minutes": 30,
+    "cluster_min_wallets": 3
+  }
+}

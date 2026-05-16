@@ -1,0 +1,11 @@
+.env
+.env.local
+state.json
+
+__pycache__/
+*.pyc
+*.pyo
+
+# build / scratch
+*.log
+*.tmp
