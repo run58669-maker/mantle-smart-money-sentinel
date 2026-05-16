@@ -115,3 +115,40 @@ class ResilientRPC:
     def tx_count(self, address: str, block: str = "latest") -> tuple[Optional[int], CallRecord]:
         raw, rec = self.call("eth_getTransactionCount", [address, block])
         return (int(raw, 16) if raw else None), rec
+
+    def logs(self, from_block: int, to_block: int, address: str | None = None,
+             topics: list | None = None) -> tuple[Optional[list], CallRecord]:
+        """eth_getLogs window. Caller is responsible for keeping the window
+        narrow — public RPCs cap log windows at 1k-10k blocks."""
+        params = [{
+            "fromBlock": hex(from_block),
+            "toBlock": hex(to_block),
+        }]
+        if address:
+            params[0]["address"] = address
+        if topics:
+            params[0]["topics"] = topics
+        return self.call("eth_getLogs", params)
+
+    def block_by_number(self, block_num: int, with_txs: bool = False) -> tuple[Optional[dict], CallRecord]:
+        """Pull a single block, optionally with full tx objects."""
+        return self.call("eth_getBlockByNumber", [hex(block_num), with_txs])
+
+
+# === ERC-20 / WMNT helpers ================================================== #
+
+WMNT_ADDRESS = "0x78c1b0c915c4faa5fffa6cabf0219da63d7f4cb8"  # canonical wrapped MNT
+
+# keccak256("Transfer(address,address,uint256)")
+TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+
+
+def address_to_topic(address: str) -> str:
+    """Pad a 20-byte address to a 32-byte topic."""
+    addr = address.lower().removeprefix("0x")
+    return "0x" + addr.rjust(64, "0")
+
+
+def topic_to_address(topic: str) -> str:
+    """Reverse: take the last 20 bytes from a 32-byte topic."""
+    return "0x" + topic.lower().removeprefix("0x")[-40:]
