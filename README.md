@@ -2,6 +2,8 @@
 
 Submission concept for the **Mantle Turing Test Hackathon 2026 — Track 2 (AI Alpha & Data)**.
 
+**Demo video (44s, unlisted):** https://youtu.be/fsJXsilm2Kg
+
 A Telegram bot that watches a curated list of Mantle smart-money wallets,
 detects anomalies (large outflows / dormancy breaks / cluster moves), and
 posts an LLM-written analyst note to a chat — all wrapped in the same
