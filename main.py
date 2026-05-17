@@ -25,6 +25,7 @@ from mantle_rpc import ResilientRPC
 from monitor import STATE_FILE, poll_once
 from resilient_llm import Scorecard
 from tg_bot import TGBot
+from tx_detail import enrich_anomaly
 
 ROOT = Path(__file__).parent
 
@@ -33,15 +34,23 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("openai").setLevel(logging.WARNING)
 
 
-def fire(event, llm_scorecard: Scorecard) -> None:
+def fire(event, llm_scorecard: Scorecard, rpc: ResilientRPC) -> None:
+    # enrich with tx-level detail so the alert can name the destination
+    enrich = enrich_anomaly(rpc, event.wallet_addr, blocks_back=60)
+    details_lines = [
+        f"Δ = <b>{event.delta['mnt']:+,.2f} MNT</b> "
+        f"({event.delta.get('pct_balance', 0):+.4f}%)",
+        f"tx_count: {event.before['tx_count']} → {event.after['tx_count']}",
+        f"Balance: {event.before['balance_mnt']:,.2f} → {event.after['balance_mnt']:,.2f} MNT",
+    ]
+    if enrich:
+        details_lines.append(
+            f"Recent tx: {enrich.direction} <code>{enrich.counterparty}</code> "
+            f"{enrich.amount_mnt:,.4f} {enrich.token} (blk {enrich.block})"
+        )
+    details = "\n".join(details_lines)
     interpretation, meta = interpret(event, scorecard=llm_scorecard)
     bot = TGBot()
-    details = (
-        f"Δ = <b>{event.delta['mnt']:+,.2f} MNT</b> "
-        f"({event.delta.get('pct_balance', 0):+.4f}%)\n"
-        f"tx_count: {event.before['tx_count']} → {event.after['tx_count']}\n"
-        f"Balance: {event.before['balance_mnt']:,.2f} → {event.after['balance_mnt']:,.2f} MNT"
-    )
     ok, info = bot.send_alert(
         wallet_tag=event.wallet_tag,
         wallet_addr=event.wallet_addr,
@@ -78,7 +87,7 @@ def main():
             print(f"\n=== poll @ {time.strftime('%H:%M:%S')} ===")
             events = poll_once(rpc)
             for ev in events:
-                fire(ev, llm_scorecard)
+                fire(ev, llm_scorecard, rpc)
 
             if args.once or args.demo:
                 break
